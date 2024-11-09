@@ -1,0 +1,503 @@
+﻿@page
+@using MoviesWebApp.Models
+@model MoviesWebApp.Pages.Movies.DetailsModel
+@inject MoviesWebApp.Data.MoviesWebAppContext _context
+
+
+@{
+	ViewData["Title"] = "Details";
+}
+
+<div>
+	<div class="row">
+		<div class="col-md-9 mb-4 video-custom">
+			<div class="ratio ratio-16x9">
+				<iframe style="border-radius: 10px;" src="@Model.Movie.MovieUrl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+			</div>
+			<div class="d-flex justify-content-between align-items-center mt-2">
+				<div class="d-flex align-items-center">
+					<span class="material-symbols-outlined ms-2 filled" style="cursor:default;opacity:50%">
+						visibility
+					</span>
+					<span class="ms-1 text-muted">@Model.Movie.ViewCount View</span>
+				</div>
+
+				@if (Model.watchList.Any(wt => wt.MovieId == Model.Movie.Id))
+				{
+					<!-- Icon for indicating the movie is already in the watchlist -->
+					<form method="post" id="RemoveWatchlist-@Model.Movie.Id" asp-route-id="@Model.Movie.Id" asp-page-handler="RemoveWatchlist">
+						<span class="material-symbols-outlined icon me-2" data-toggle="tooltip" title="Remove from Watchlist"
+							  style="color: white; background-color: red; border-radius: 50%; padding: 5px;"
+							  onclick="document.getElementById('RemoveWatchlist-@Model.Movie.Id').submit();">
+							playlist_remove
+						</span>
+					</form>
+				}
+				else
+				{
+					<!-- Icon for adding the movie to the watchlist -->
+					<form method="post" id="AddWatchlist-@Model.Movie.Id" asp-route-id="@Model.Movie.Id" asp-page-handler="AddWatchlist">
+						<span class="material-symbols-outlined icon me-2" data-toggle="tooltip" title="Add to Watchlist"
+							  style="font-size: 24px; color: white; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; padding: 5px;"
+							  onclick="document.getElementById('AddWatchlist-@Model.Movie.Id').submit();">
+							playlist_add_circle
+						</span>
+					</form>
+				}
+			</div>
+
+		</div>
+
+		<div class="col-md-3 mt-2 mb-5 rate-custom">
+			<div class="row">
+
+				<div class="col-9 d-flex justify-content-end rate-start1">
+					<div class="d-flex flex-column justify-content-center align-items-center rate1">
+						<h6 style="font-size:17px">Average Rating</h6>
+						<div class="d-flex align-items-center">
+							<span class="mb-0">@Model.Movie.AverageRating / 10</span>
+							<span class="material-symbols-outlined filled ms-1" style="color: yellow;cursor:default;">
+								star
+							</span>
+						</div>
+					</div>
+
+				</div>
+
+
+				<div class="col-3 d-flex justify-content-center align-items-center icon-start">
+					<span class="material-symbols-outlined" style="font-size: 40px; cursor: default;">
+						hotel_class
+					</span>
+				</div>
+
+
+
+
+				<div class="col-9 d-flex justify-content-end mt-3 rate-start2">
+					<div class="d-flex flex-column justify-content-center align-items-center rate2">
+						<h6 style="font-size:17px">Rate this Movie</h6>
+						<form method="post" asp-page-handler="Rating" asp-route-id="@Model.Movie.Id" id="ratingForm">
+							<div class="form-group d-flex justify-content-center align-items-center">
+								<select id="UserRating" name="UserRating" class="form-select-sm" onchange="document.getElementById('ratingForm').submit();">
+									
+									 <option value="" disabled selected>-</option>
+
+									@for (int i = 1; i <= 10; i++)
+									{
+										if (i != @Model.UserRating)
+										{
+											<option value="@i">@i</option>
+										}
+										else
+										{
+											<option value="@i" selected="selected">
+												@Model.UserRating
+											</option>
+
+										}
+
+									}
+								</select>
+								<span class="ms-1">/10</span>
+								<span class="material-symbols-outlined filled ms-1" style="color: yellow;cursor:default;">
+									star
+								</span>
+							</div>
+						</form>
+					</div>
+				</div>
+
+
+				<div class="col-3 d-flex justify-content-center align-items-center mt-3 icon-start">
+					<span class="material-symbols-outlined" style="font-size: 40px; cursor: default;">
+						reviews
+					</span>
+				</div>
+			</div>
+		</div>
+
+
+
+	</div>
+
+
+
+	<dl class="row col-md">
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.Title)
+		</dt>
+		<dd class="col-8">
+			@Html.DisplayFor(model => model.Movie.Title)
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.ReleaseDate)
+		</dt>
+		<dd class="col-8">
+			@Html.DisplayFor(model => model.Movie.ReleaseDate)
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.SelectedGenres)
+		</dt>
+		<dd class="col-8">
+			@foreach (var genreId in Model.Movie.SelectedGenres)
+			{
+				var genre = _context.Genre.FirstOrDefault(g => g.Id == genreId);
+				<span>@genre.Name</span>
+				@if (genreId != Model.Movie.SelectedGenres.Last())
+				{
+					<span>, </span>
+				}
+			}
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.SelectedCountries)
+		</dt>
+		<dd class="col-8">
+			@foreach (var countryId in Model.Movie.SelectedCountries)
+			{
+				var country = _context.Country.FirstOrDefault(c => c.Id == countryId);
+				<span>@country.Name</span>
+				@if (countryId != Model.Movie.SelectedCountries.Last())
+				{
+					<span>, </span>
+				}
+			}
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.DurationMinutes)
+		</dt>
+		<dd class="col-8">
+			@Html.DisplayFor(model => model.Movie.DurationMinutes)
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.Price)
+		</dt>
+		<dd class="col-8">
+			@Html.DisplayFor(model => model.Movie.Price) <span style="font-size: smaller;">@Model.Movie.PriceCurrency</span>
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.Budget)
+		</dt>
+		<dd class="col-8">
+			@Html.DisplayFor(model => model.Movie.Budget) <span style="font-size: smaller;">@Model.Movie.BudgetCurrency</span>
+		</dd>
+		<dt class="col-4">
+			@Html.DisplayNameFor(model => model.Movie.Description)
+		</dt>
+		<dd class="col-8">
+			@Html.DisplayFor(model => model.Movie.Description)
+		</dd>
+	</dl>
+
+
+
+	<hr />
+	<br />
+
+
+
+	@* ForComment *@
+
+
+	<div>
+		<div class="d-flex align-items-center">
+			<h4>Comments</h4>
+			<span class="ms-2 mb-1 text-muted" style="font-size:20px">@Model.Movie.UsersComments.Count()</span>
+		</div>
+
+		<form class="mt-3" method="post" id="sendComment" asp-page-handler="Comment" asp-route-id="@Model.Movie.Id" asp-route-toCommentId="0">
+			<div class="form-group d-flex align-items-center">
+				<textarea asp-for="UserComment" class="form-control" placeholder="Leave a comment..."></textarea>
+				<span class="material-symbols-outlined icon ms-2" style="font-size:27px" data-toggle="tooltip" title="Send" onclick="document.getElementById('sendComment').submit();">
+					send
+				</span>
+			</div>
+		</form>
+	</div>
+	<br />
+	<br />
+	<hr />
+
+
+	<div class="mt-5">
+
+		@foreach (var comment in Model.Movie.UsersComments.Where(c => c.ToCommentId == 0).OrderByDescending(c => c.DateOfComment))
+		{
+			<div class="p-2 mb-4 border rounded">
+				<div class="mb-2 d-flex align-items-center">
+					<span class="material-symbols-outlined me-1" style="font-size:35px;cursor:default">
+						account_circle
+					</span>
+					<strong>@(comment.User?.UserName ?? "Unknown User"): </strong>
+					<span class="text-muted ms-2">@comment.DateOfComment.ToString()</span>
+					@if (@comment.DateOfEdit.Year != 0001)
+					{
+						<span class="text-muted ms-2">(Edited: @comment.DateOfEdit.ToString())</span>
+					}
+
+
+
+				</div>
+
+
+
+
+
+
+				<form method="post" id="editComment-@comment.Id" asp-page-handler="EditComment" asp-route-commentId="@comment.Id" class="mb-2">
+					<div class="form-group">
+
+						@if (comment.UserId != (int)ViewData["CurrentUserId"])
+						{
+							<div class="ms-2 mt-2 mb-3">
+								<text>@comment.UserComment</text>
+							</div>
+
+						}
+						else
+						{
+							<textarea class="form-control" name="UserComment">@comment.UserComment</textarea>
+						}
+					</div>
+				</form>
+
+				<div class="d-flex align-content-center">
+					@if (comment.LikesDislikes != null && comment.LikesDislikes.Any(cl => cl.UserId == (int)ViewData["CurrentUserId"]))
+					{
+						bool hasLiked = comment.LikesDislikes.Any(cl => cl.UserId == (int)ViewData["CurrentUserId"] && cl.Type == "Like");
+						bool hasDisliked = comment.LikesDislikes.Any(cl => cl.UserId == (int)ViewData["CurrentUserId"] && cl.Type == "Dislike");
+
+						<span class="material-symbols-outlined ms-2 @(hasLiked ? "filled" : "")" onclick="document.getElementById('likeCommand-@comment.Id').submit();">thumb_up</span>
+						<span class="ms-1">@(comment.LikesDislikes.Count(cl => cl.Type == "Like"))</span>
+
+						<span class="material-symbols-outlined like-button ms-2 @(hasDisliked ? "filled" : "")" onclick="document.getElementById('dislikeCommand-@comment.Id').submit();">thumb_down</span>
+						<span class="ms-1">@(comment.LikesDislikes.Count(cl => cl.Type == "Dislike"))</span>
+					}
+					else
+					{
+						<span class="material-symbols-outlined ms-2" onclick="document.getElementById('likeCommand-@comment.Id').submit();">thumb_up</span>
+						<span class="ms-1">@(comment.LikesDislikes != null ? comment.LikesDislikes.Count(cl => cl.Type == "Like") : 0)</span>
+
+						<span class="material-symbols-outlined ms-2" onclick="document.getElementById('dislikeCommand-@comment.Id').submit();">thumb_down</span>
+						<span class="ms-1">@(comment.LikesDislikes != null ? comment.LikesDislikes.Count(cl => cl.Type == "Dislike") : 0)</span>
+					}
+
+					<form method="post" id="likeCommand-@comment.Id" asp-page-handler="LikeDislikeComment" asp-route-commentId="@comment.Id" asp-route-type="Like" style="display:none;"></form>
+					<form method="post" id="dislikeCommand-@comment.Id" asp-page-handler="LikeDislikeComment" asp-route-commentId="@comment.Id" asp-route-type="Dislike" style="display:none;"></form>
+				</div>
+
+				@if (comment.UserId == (int)ViewData["CurrentUserId"])
+				{
+					<div class="d-flex align-items-center mt-1">
+						<span class="material-symbols-outlined icon ms-2" style="font-size:27px" data-toggle="tooltip" title="Edit" onclick="confirmEditComment(@comment.Id)">edit_note</span>
+
+						<form method="post" id="deleteComment-@comment.Id" asp-page-handler="DeleteComment" asp-route-commentId="@comment.Id">
+							<span class="material-symbols-outlined icon ms-2 mt-1" style="color:red" data-toggle="tooltip" title="Delete" onclick="confirmDeleteComment(@comment.Id)">delete</span>
+						</form>
+					</div>
+				}
+
+				<div class="d-flex align-items-center mt-1">
+					<span class="material-symbols-outlined ms-2 mt-2" data-toggle="tooltip" title="Reply" onclick="replyCommentForm(@comment.Id)">
+						prompt_suggestion
+					</span>
+					<span class="mt-1">@Model.Movie.UsersComments.Count(c => c.ToCommentId == comment.Id)</span>
+				</div>
+
+
+
+
+				@* ForReplyComment *@
+
+				<div id="replyCommentForm-@comment.Id" hidden class="ms-2">
+					<div class="ms-2">
+						<div class="mt-3">
+							<span class="text-muted">-----Reply</span>
+						</div>
+
+						<form class="mb-4 mt-4" method="post" id="sendReplyComment-@comment.Id" asp-page-handler="Comment" asp-route-id="@Model.Movie.Id" asp-route-toCommentId="@comment.Id">
+							<div class="form-group d-flex align-items-center">
+								<textarea asp-for="UserComment" class="form-control" placeholder="Leave a comment..."></textarea>
+								<span class="material-symbols-outlined icon ms-2" style="font-size:27px" data-toggle="tooltip" title="Send" onclick="document.getElementById('sendReplyComment-@comment.Id').submit();">
+									send
+								</span>
+							</div>
+						</form>
+						<hr />
+
+						@foreach (var replyComment in Model.Movie.UsersComments.Where(c => c.ToCommentId == comment.Id).OrderByDescending(c => c.DateOfComment))
+						{
+
+							<div class="p-2 mb-3 mx-3 border border-2 rounded">
+								<div class="mb-2 d-flex align-items-center">
+									<span class="material-symbols-outlined me-1" style="font-size:35px;cursor:default">
+										account_circle
+									</span>
+									<strong>@(replyComment.User?.UserName ?? "Unknown User"): </strong>
+									<span class="text-muted ms-2">@replyComment.DateOfComment.ToString()</span>
+									@if (@comment.DateOfEdit.Year != 0001)
+									{
+										<span class="text-muted ms-2">(Edited: @replyComment.DateOfEdit.ToString())</span>
+									}
+								</div>
+
+
+								<form method="post" id="editComment-@replyComment.Id" asp-page-handler="EditComment" asp-route-commentId="@replyComment.Id" class="mb-2">
+									<div class="form-group">
+										@if (replyComment.UserId != (int)ViewData["CurrentUserId"])
+										{
+											<div class="ms-2 mt-2 mb-3">
+												<text>@replyComment.UserComment</text>
+											</div>
+										}
+										else
+										{
+											<textarea class="form-control" name="UserComment">@replyComment.UserComment</textarea>
+										}
+									</div>
+								</form>
+
+								<div class="d-flex align-content-center">
+									@if (replyComment.LikesDislikes != null && replyComment.LikesDislikes.Any(cl => cl.UserId == (int)ViewData["CurrentUserId"]))
+									{
+										bool hasLiked = replyComment.LikesDislikes.Any(cl => cl.UserId == (int)ViewData["CurrentUserId"] && cl.Type == "Like");
+										bool hasDisliked = replyComment.LikesDislikes.Any(cl => cl.UserId == (int)ViewData["CurrentUserId"] && cl.Type == "Dislike");
+
+										<span class="material-symbols-outlined ms-2 @(hasLiked ? "filled" : "")" onclick="document.getElementById('likeCommand-@replyComment.Id').submit();">thumb_up</span>
+										<span class="ms-1">@(replyComment.LikesDislikes.Count(cl => cl.Type == "Like"))</span>
+
+										<span class="material-symbols-outlined like-button ms-2 @(hasDisliked ? "filled" : "")" onclick="document.getElementById('dislikeCommand-@replyComment.Id').submit();">thumb_down</span>
+										<span class="ms-1">@(replyComment.LikesDislikes.Count(cl => cl.Type == "Dislike"))</span>
+									}
+									else
+									{
+										<span class="material-symbols-outlined ms-2" onclick="document.getElementById('likeCommand-@replyComment.Id').submit();">thumb_up</span>
+										<span class="ms-1">@(replyComment.LikesDislikes != null ? replyComment.LikesDislikes.Count(cl => cl.Type == "Like") : 0)</span>
+
+										<span class="material-symbols-outlined ms-2" onclick="document.getElementById('dislikeCommand-@replyComment.Id').submit();">thumb_down</span>
+										<span class="ms-1">@(replyComment.LikesDislikes != null ? replyComment.LikesDislikes.Count(cl => cl.Type == "Dislike") : 0)</span>
+									}
+
+									<form method="post" id="likeCommand-@replyComment.Id" asp-page-handler="LikeDislikeComment" asp-route-commentId="@replyComment.Id" asp-route-type="Like" style="display:none;"></form>
+									<form method="post" id="dislikeCommand-@replyComment.Id" asp-page-handler="LikeDislikeComment" asp-route-commentId="@replyComment.Id" asp-route-type="Dislike" style="display:none;"></form>
+								</div>
+
+								@if (replyComment.UserId == (int)ViewData["CurrentUserId"])
+								{
+									<div class="d-flex align-items-center mt-1">
+										<span class="material-symbols-outlined icon ms-2" style="font-size:27px" data-toggle="tooltip" title="Edit" onclick="confirmEditComment(@replyComment.Id)">edit_note</span>
+
+										<form method="post" id="deleteComment-@replyComment.Id" asp-page-handler="DeleteComment" asp-route-commentId="@replyComment.Id">
+											<span class="material-symbols-outlined icon ms-2 mt-1" style="color:red" data-toggle="tooltip" title="Delete" onclick="confirmDeleteComment(@replyComment.Id)">delete</span>
+										</form>
+									</div>
+								}
+							</div>
+
+							<span class="text-muted">-----</span>
+						}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					</div>
+				</div>
+
+
+
+			</div>
+		}
+
+	</div>
+
+	@if (User.IsInRole("Admin"))
+	{
+		<div class="d-flex justify-content-start mt-3">
+			<a class="btn btn-primary me-2" asp-page="./Edit" asp-route-id="@Model.Movie.Id" asp-route-name="@Model.Movie.Id">Edit</a>
+			<form method="post" asp-page-handler="Delete" asp-route-id="@Model.Movie.Id" onsubmit="return confirmDelete('@Model.Movie.Title');">
+				<button type="submit" class="btn btn-danger">Delete</button>
+			</form>
+		</div>
+	}
+
+
+</div>
+
+
+@section Scripts {
+	<script>
+
+		function confirmDelete(movieName) {
+			return confirm(`Are you sure you want to delete movie named "${movieName}"?`);
+		}
+
+
+		function replyCommentForm(commentId) {
+
+			if (document.getElementById('replyCommentForm-' + commentId).hidden == false) {
+				document.getElementById('replyCommentForm-' + commentId).hidden = true;
+			}
+			else {
+				document.getElementById('replyCommentForm-' + commentId).hidden = false;
+			}
+
+
+		}
+
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		});
+
+		function confirmEditComment(commentId) {
+			if (confirm('Are you sure you want to edit this comment?')) {
+				document.getElementById('editComment-' + commentId).submit();
+			}
+		}
+
+		function confirmDeleteComment(commentId) {
+			if (confirm('Are you sure you want to delete this comment?')) {
+				document.getElementById('deleteComment-' + commentId).submit();
+			}
+		}
+
+		// function toggleLike(element) {
+		// 	const commentContainer = element.closest('.likeDislikeClass');
+
+		// 	const dislikeButton = commentContainer.querySelectorAll('.dislike-button');
+		// 	element.classList.toggle('filled');
+		// 	dislikeButton.forEach(btn => btn.classList.remove('filled'));
+
+		// 	document.getElementById('likeCommand').submit();
+
+		// }
+
+		// function toggleDislike(element) {
+		// 	const commentContainer = element.closest('.likeDislikeClass');
+
+		// 	const likeButton = commentContainer.querySelectorAll('.like-button');
+
+		// 	element.classList.toggle('filled');
+
+		// 	likeButton.forEach(btn => btn.classList.remove('filled'));
+
+		// 	document.getElementById('dislikeCommand').submit();
+		// }
+
+
+
+
+	</script>
+
+}

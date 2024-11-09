@@ -1,0 +1,247 @@
+﻿@page
+@model MoviesWebApp.Pages.Movies.IndexModel
+@inject MoviesWebApp.Data.MoviesWebAppContext _context
+@{
+	ViewData["Title"] = "Index";
+	ViewData["ShowFilter"] = true;
+}
+
+
+
+<div class="collapse @(Model.IsFilterOpen? "show": "")" id="filterForm">
+	<div class="container mt-3">
+		<form method="get">
+			<div class="row">
+				<div class="col-4 mt-3">
+					<select asp-for="SelectedGenre" class="form-select" asp-items="Model.GenreList">
+						<option value="">All Genres</option>
+					</select>
+				</div>
+				<div class="col-4 mt-3">
+					<input asp-for="ReleaseYear" type="number" class="form-control" placeholder="Enter Release Year" min="1898" max="@(DateTime.Now.Year)" id="releaseYearInput">
+				</div>
+				<div class="col-4 mt-3">
+					<select asp-for="SelectedCountry" class="form-select" asp-items="Model.CountryList">
+						<option value="">All Countries</option>
+					</select>
+				</div>
+			</div>
+			<div class="text-end">
+				<button type="submit" class="btn btn-primary mt-3">Apply Filters</button>
+			</div>
+		</form>
+		<hr />
+	</div>
+</div>
+
+
+<div id="lastThreeMoviesCarousel" class="carousel slide mb-5 shadow-lg" data-bs-ride="carousel" style="overflow:hidden;border-radius:10px;">
+	<div class="carousel-inner">
+		@for (int i = 0; i < Model.LastThreeMovies.Count; i++)
+		{
+			var movie = Model.LastThreeMovies[i];
+			<div class="carousel-item @(i == 0 ? "active" : "")">
+				<a asp-page="./Details" asp-route-id="@movie.Id">
+					<img src='@(movie.ImageUrl == null
+                             ? $"https://fakeimg.pl/800x400/?text={movie.Title}"
+                             : "/uploads/images/" + movie.ImageUrl)'
+						 class="d-block w-100  zoom-image" alt="@movie.Title">
+
+
+				</a>
+
+				<div class="carousel-caption d-none d-md-block">
+					<h5>@movie.Title (@movie.ReleaseDate.Year)</h5>
+				</div>
+			</div>
+		}
+	</div>
+	<button class="carousel-control-prev" type="button" data-bs-target="#lastThreeMoviesCarousel" data-bs-slide="prev">
+		<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		<span class="visually-hidden">Previous</span>
+	</button>
+	<button class="carousel-control-next" type="button" data-bs-target="#lastThreeMoviesCarousel" data-bs-slide="next">
+		<span class="carousel-control-next-icon" aria-hidden="true"></span>
+		<span class="visually-hidden">Next</span>
+	</button>
+</div>
+
+
+<div class="row gx-3">
+	@foreach (var movie in Model.Movie)
+	{
+		<div class="col-md-4 col-6 mb-4">
+			<!-- mb-4 adds spacing below each item -->
+			<div class="hover-container" style="overflow:hidden; border-radius:10px; position: relative;">
+				<a class="text-decoration-none text-dark" asp-page="./Details" asp-route-id="@movie.Id">
+					<img class="zoom-image" style="width:100%; height:auto; border-radius: 10px;"
+						 src='@(movie.ImageUrl == null
+                             ? $"https://fakeimg.pl/300x300/?text={movie.Title}"
+                             : "/uploads/images/" + movie.ImageUrl)'
+						 alt="@movie.Title"
+						 data-toggle="tooltip" title="
+					 @foreach (var genreId in movie.SelectedGenres)
+							 {
+							 var genre = _context.Genre.FirstOrDefault(g => g.Id == genreId);
+						@genre.Name
+						@if (genreId != movie.SelectedGenres.Last())
+						{
+						@:,
+						}
+						}"
+						 data-bs-placement="bottom">
+
+					@if (Model.watchList.Any(wt => wt.MovieId == movie.Id))
+					{
+						<!-- Icon for indicating the movie is already in the watchlist -->
+						<span class="material-symbols-outlined" data-toggle="tooltip" title="At Watchlist"
+							  style="position:absolute; top: 10px; left: 10px; font-size: 24px; color: gray; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; padding: 5px;"
+							  onclick="event.preventDefault();">
+							playlist_add_circle
+						</span>
+					}
+					else
+					{
+						<!-- Icon for adding the movie to the watchlist -->
+						<form method="post" id="AddWatchlist-@movie.Id" asp-route-id="@movie.Id" asp-page-handler="AddWatchlist">
+							<span class="material-symbols-outlined icon" data-toggle="tooltip" title="Add to Watchlist"
+								  style="position:absolute; top: 10px; left: 10px; font-size: 24px; color: white; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; padding: 5px;"
+								  onclick="event.preventDefault(); document.getElementById('AddWatchlist-@movie.Id').submit();">
+								playlist_add_circle
+							</span>
+						</form>
+					}
+
+				</a>
+			</div>
+		</div>
+	}
+
+</div>
+
+<span class="material-symbols-outlined d-flex justify-content-center " style="font-size:40px">
+	keyboard_arrow_down
+</span>
+
+<br>
+<br>
+<br>
+
+
+<h3 class="mb-3 ms-3">Most Viwed Movies</h3>
+
+
+<div class="swiper">
+	<!-- Additional required wrapper -->
+	<div class="slide-custom">
+		<div class="swiper-wrapper">
+			@foreach (var movie in Model.Movie.Where(m => m.ViewCount > 1).OrderByDescending(m => m.ViewCount))
+			{
+
+				<div class="col-md-4 col-6 mb-4 swiper-slide">
+					<div class="hover-container" style="overflow:hidden; border-radius:10px; position: relative;">
+						<a class="text-decoration-none text-dark" asp-page="./Details" asp-route-id="@movie.Id">
+							<img class="zoom-image" style="width:100%; height:auto; border-radius: 10px;"
+								 src='@(movie.ImageUrl == null
+                             ? $"https://fakeimg.pl/100x100/?text={movie.Title}"
+                             : "/uploads/images/" + movie.ImageUrl)'
+								 alt="@movie.Title"
+								 data-toggle="tooltip" title="
+							 @foreach (var genreId in movie.SelectedGenres)
+							 {
+							 var genre = _context.Genre.FirstOrDefault(g => g.Id == genreId);
+						@genre.Name
+						@if (genreId != movie.SelectedGenres.Last())
+						{
+						@:,
+						}
+						}"
+								 data-bs-placement="bottom">
+
+							@if (Model.watchList.Any(wt => wt.MovieId == movie.Id))
+							{
+								<!-- Icon for indicating the movie is already in the watchlist -->
+								<span class="material-symbols-outlined" data-toggle="tooltip" title="At Watchlist"
+									  style="position:absolute; top: 10px; left: 10px; font-size: 24px; color: gray; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; padding: 5px;"
+									  onclick="event.preventDefault();">
+									playlist_add_circle
+								</span>
+							}
+							else
+							{
+								<!-- Icon for adding the movie to the watchlist -->
+								<form method="post" id="AddWatchlist-@movie.Id" asp-route-id="@movie.Id" asp-page-handler="AddWatchlist">
+									<span class="material-symbols-outlined icon" data-toggle="tooltip" title="Add to Watchlist"
+										  style="position:absolute; top: 10px; left: 10px; font-size: 24px; color: white; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; padding: 5px;"
+										  onclick="event.preventDefault(); document.getElementById('AddWatchlist-@movie.Id').submit();">
+										playlist_add_circle
+									</span>
+								</form>
+							}
+
+						</a>
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+
+	<!-- If we need pagination -->
+	<div class="swiper-pagination"></div>
+
+	<!-- If we need navigation buttons -->
+	<div class="swiper-button-prev icon">
+	</div>
+	<div class="swiper-button-next icon"></div>
+
+</div>
+
+@section Scripts {
+	<script>
+		const swiper = new Swiper('.slide-custom', {
+			spaceBetween: 15,
+			navigation: {
+				nextEl: '.swiper-button-next',
+				prevEl: '.swiper-button-prev',
+			},
+			pagination: {
+				el: '.swiper-pagination',
+				clickable: true,
+				dynamicBullets: true
+			},
+			breakpoints: {
+				0: {
+					slidesPerView: 1,
+				},
+				650: {
+					slidesPerView: 2,
+				},
+				950: {
+					slidesPerView: 3,
+				},
+
+			},
+
+		});
+
+
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		});
+
+		document.getElementById('releaseYearInput').addEventListener('blur', function () {
+			const maxYear = 2024;
+			const minYear = 1898;
+			let inputYear = parseInt(this.value);
+
+			if (inputYear > maxYear) {
+				this.value = maxYear;
+			} else if (inputYear < minYear) {
+				this.value = minYear;
+			}
+		});
+
+
+	</script>
+
+}

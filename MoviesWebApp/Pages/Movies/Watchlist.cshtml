@@ -1,0 +1,58 @@
+﻿@page
+@model MoviesWebApp.Pages.Movies.WatchlistModel
+@{
+	ViewData["Title"] = "Watchlist";
+}
+
+
+<div class="row gx-3">
+	@foreach (var movie in Model.Movie)
+	{
+		<div class="col-md-4 col-6 mb-4">
+			<!-- mb-4 adds spacing below each item -->
+			<div class="hover-container" style="overflow:hidden; border-radius:10px; position: relative;">
+				<a class="text-decoration-none text-dark" asp-page="./Details" asp-route-id="@movie.Id">
+					<img class="zoom-image" style="width:100%; height:auto; border-radius: 10px;"
+						 src='@(movie.ImageUrl == null
+                             ? $"https://fakeimg.pl/300x300/?text={movie.Title}"
+                             : "/uploads/images/" + movie.ImageUrl)'
+						 alt="@movie.Title"
+						 data-toggle="tooltip" title="
+
+					@foreach (var genre in movie.Genre)
+					{
+					@genre.Name
+					@if (genre != movie.Genre.Last())
+					{
+					@:,
+					}
+					}"
+						 data-bs-placement="bottom">
+
+					<form method="post" id="RemoveWatchlist-@movie.Id" asp-route-id="@movie.Id" asp-page-handler="RemoveWatchlist">
+						<span class="material-symbols-outlined icon" data-toggle="tooltip" title="Remove from Watchlist"
+							  style="position:absolute; top: 10px; left: 10px; font-size: 24px; color: white; background-color: red; border-radius: 50%; padding: 5px;"
+							  onclick="event.preventDefault(); document.getElementById('RemoveWatchlist-@movie.Id').submit();">
+							playlist_remove
+						</span>
+					</form>
+
+
+				</a>
+			</div>
+		</div>
+	}
+
+</div>
+
+@section Scripts {
+	<script>
+
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip()
+		});
+
+		
+	</script>
+
+}

@@ -1,0 +1,105 @@
+﻿﻿@using Microsoft.AspNetCore.Identity
+@using MoviesWebApp.Custom
+@inject ApplicationSignInManager SignInManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - MoviesWebApp</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/MoviesWebApp.styles.css" asp-append-version="true" />
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+	<link rel="stylesheet"
+		  href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+<body>
+	<header>
+		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+
+			<div class="container">
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+						aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+					@if (SignInManager.IsSignedIn(User))
+					{
+						<ul class="navbar-nav flex-grow-1">
+							<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle text-light" href="#" id="moviesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 25px;">
+									Movies
+								</a>
+								<ul class="dropdown-menu" aria-labelledby="moviesDropdown">
+									<li>
+										<a class="dropdown-item" asp-area="" asp-page="/Movies/Index">Look at Movies</a>
+									</li>
+									<li>
+										<a class="dropdown-item" asp-area="" asp-page="/Movies/Watchlist">Look at Watchlist</a>
+									</li>
+									@if (User.IsInRole("Admin"))
+									{
+										<li>
+											<a class="dropdown-item" asp-area="" asp-page="/Movies/Create">Create Movie</a>
+										</li>
+									}
+									
+								</ul>
+							</li>
+							@if (ViewData["ShowFilter"] != null && (bool)ViewData["ShowFilter"])
+							{
+								<li class="nav-item">
+									<a class="nav-link dropdown-toggle text-light" href="#" data-bs-toggle="collapse" data-bs-target="#filterForm" aria-expanded="false" aria-controls="filterForm" style="font-size: 25px;">
+										Filter
+									</a>
+								</li>
+							}
+							@if (User.IsInRole("Admin"))
+							{
+								<li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle text-light" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 25px;">
+										Admin
+									</a>
+									<ul class="dropdown-menu" aria-labelledby="adminDropdown">
+										<li>
+											<a class="dropdown-item" asp-area="Admin" asp-page="/Users/Index">Users</a>
+										</li>
+										<li>
+											<a class="dropdown-item" asp-area="Admin" asp-page="/Roles/Index">Roles</a>
+										</li>
+									</ul>
+								</li>
+								
+							}
+							
+
+
+						</ul>
+					}
+					<partial name="_LoginPartial" />
+				</div>
+			</div>
+
+
+		</nav>
+
+	</header>
+
+	<div class="container custom-container">
+		<main role="main" class="pb-3">
+			@RenderBody()
+		</main>
+	</div>
+
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

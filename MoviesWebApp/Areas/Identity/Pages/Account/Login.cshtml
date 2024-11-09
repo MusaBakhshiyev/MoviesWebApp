@@ -1,0 +1,78 @@
+﻿@page
+@model LoginModel
+@{
+	Layout = "_LayoutLogin";
+}
+@{
+	ViewData["Title"] = "Log in";
+}
+
+<style>
+
+	body {
+		background-image: url('/uploads/images/LoginBackground.jpg');
+		background-position: center;
+		background-size: cover;
+		height: 100vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.card {
+		opacity: 90%;
+		background-color: black;
+		width: 400px;
+		border-radius: 10px;
+		padding: 20px;
+		padding-bottom:25px;
+	}
+
+
+		.card .btn {
+			width:100%;
+			background-color:yellow;
+			color: white;
+			font-size:21px;
+			text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+		}
+
+		.card .btn:hover {
+				transition: opacity 0.3s ease;
+				opacity: 0.8;
+		}
+
+</style>
+
+
+
+
+<body>
+	<div class="card">
+		<h3 class="text-center mb-4" style="color:white">@ViewData["Title"]</h3>
+		<form id="account" method="post">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+			<div class="form-floating mb-3">
+				<input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="Email" />
+				<label asp-for="Input.Email" class="form-label">Email</label>
+				<span asp-validation-for="Input.Email" class="text-danger"></span>
+			</div>
+
+			<div class="form-floating mb-3">
+				<input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" />
+				<label asp-for="Input.Password" class="form-label">Password</label>
+				<span asp-validation-for="Input.Password" class="text-danger"></span>
+			</div>
+
+				<button id="login-submit" type="submit" class="mb-3 btn btn-lg">Log in</button>
+			
+			<span style="color:white">Don't have any account? : </span>
+			<a style="color:yellow" asp-page="/Account/Register">Register</a>
+		</form>
+	</div>
+</body>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

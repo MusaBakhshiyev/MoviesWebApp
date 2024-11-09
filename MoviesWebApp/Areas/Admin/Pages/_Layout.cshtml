@@ -1,0 +1,17 @@
+﻿﻿@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h2>Change your admin settings</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+   @await RenderSectionAsync("Scripts", required: false)
+}
